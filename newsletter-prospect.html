@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Presidio mensile — Giugno 2026 | Presidia</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --navy: #17394A;
+    --navy-dark: #0F2732;
+    --teal: #4C9A8B;
+    --teal-light: #6FB5A7;
+    --teal-deep: #2E6F63;
+    --offwhite: #F2F6F6;
+    --mist: #E2EDEC;
+    --slate: #4A4F55;
+    --indigo: #5A4FCF;
+    --indigo-dark: #4538AA;
+    --white: #FFFFFF;
+    --font-head: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-body: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --radius-md: 14px;
+    --radius-lg: 22px;
+    --shadow-sm: 0 2px 10px rgba(23, 57, 74, 0.07);
+    --shadow-md: 0 12px 32px rgba(23, 57, 74, 0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--mist);
+    color: var(--slate);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  .frame {
+    max-width: 660px;
+    margin: 32px auto;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+  }
+  .viewbar {
+    text-align: center;
+    font-size: 12px;
+    color: var(--slate);
+    opacity: .7;
+    padding: 14px 24px 0;
+  }
+  header.mail-header {
+    background: var(--offwhite);
+    padding: 26px 40px;
+    border-bottom: 1px solid rgba(23, 57, 74, 0.08);
+  }
+  header.mail-header img { width: 140px; }
+  .hero { width: 100%; height: 280px; object-fit: cover; }
+  .eyebrow {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--teal-deep);
+    margin: 36px 40px 0;
+  }
+  h1.title {
+    font-family: var(--font-head);
+    color: var(--navy);
+    font-weight: 800;
+    font-size: 26px;
+    line-height: 1.28;
+    margin: 8px 40px 0;
+  }
+  p.subtitle {
+    font-family: var(--font-head);
+    color: var(--teal-deep);
+    font-weight: 500;
+    font-size: 16px;
+    margin: 12px 40px 0;
+  }
+  section { padding: 0 40px; }
+  p.body-text { font-size: 15px; margin-top: 18px; }
+  h2.section-title {
+    font-family: var(--font-head);
+    color: var(--navy);
+    font-size: 18px;
+    margin-top: 32px;
+  }
+  .box {
+    background: var(--offwhite);
+    border-left: 4px solid var(--teal);
+    border-radius: var(--radius-md);
+    padding: 22px 24px;
+    margin-top: 16px;
+  }
+  .box.indigo { border-left-color: var(--indigo); }
+  .box p.box-title {
+    font-family: var(--font-head);
+    color: var(--navy);
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  .box p.box-text { font-size: 14.5px; margin-top: 0; }
+  .checklist { list-style: none; margin-top: 14px; display: grid; gap: 10px; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 10px 12px;
+    border-radius: 10px;
+    transition: background .15s ease;
+  }
+  .checklist li:hover { background: var(--offwhite); }
+  .checklist li.answered-yes { background: rgba(76, 154, 139, 0.12); }
+  .checklist .num {
+    flex: 0 0 auto;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--indigo);
+    color: #fff;
+    font-family: var(--font-head);
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .checklist li.answered-yes .num { background: var(--teal-deep); }
+  #quiz-result {
+    margin-top: 16px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--navy);
+    min-height: 20px;
+  }
+  .btn {
+    display: inline-block;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 14.5px;
+    border-radius: 999px;
+    padding: 12px 26px;
+    margin-top: 18px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .btn-ghost { border: 1.5px solid var(--navy); color: var(--navy); background: transparent; }
+  .btn-ghost:hover { background: rgba(23, 57, 74, 0.05); }
+  .btn-primary { background: var(--indigo); color: #fff; border: none; }
+  .btn-primary:hover { background: var(--indigo-dark); }
+  hr.divider { border: none; border-top: 1px solid rgba(23, 57, 74, 0.1); margin: 32px 40px 0; }
+  .countdown {
+    margin: 36px 40px 0;
+    background: var(--navy);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .countdown .num-days {
+    font-family: var(--font-head);
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--teal-light);
+    min-width: 64px;
+  }
+  .countdown .label {
+    color: rgba(242,246,246,0.85);
+    font-size: 13.5px;
+  }
+  .cta-banner {
+    margin: 36px 40px 40px;
+    background: var(--navy);
+    border-radius: var(--radius-lg);
+    padding: 34px 32px;
+    text-align: center;
+  }
+  .cta-banner .kicker {
+    font-family: var(--font-head);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--teal-light);
+    margin-bottom: 6px;
+  }
+  .cta-banner .headline {
+    font-family: var(--font-head);
+    color: #fff;
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 1.35;
+    margin-bottom: 20px;
+  }
+  footer.mail-footer {
+    background: var(--navy);
+    padding: 36px 40px;
+  }
+  footer.mail-footer img { width: 110px; margin-bottom: 14px; }
+  footer.mail-footer p { font-size: 12.5px; color: rgba(242,246,246,0.65); margin-top: 10px; }
+  footer.mail-footer p.disclaimer { font-size: 11.5px; color: rgba(242,246,246,0.5); font-style: italic; }
+  footer.mail-footer a { color: rgba(242,246,246,0.7); text-decoration: underline; }
+  @media (max-width: 620px) {
+    .frame { margin: 0; border-radius: 0; }
+    header.mail-header, .eyebrow, h1.title, p.subtitle, section, hr.divider, .countdown, .cta-banner, footer.mail-footer {
+      padding-left: 22px !important; padding-right: 22px !important; margin-left: 0 !important; margin-right: 0 !important;
+    }
+    .hero { height: 200px; }
+  }
+</style>
+
+</head>
+<body>
+<p class="viewbar">Versione &laquo;visualizza nel browser&raquo; &mdash; anteprima web della newsletter, non il codice per l'invio via Mailchimp</p>
+<div class="frame">
+<header class="mail-header"><img src="assets/newsletter/logo_email.png" alt="Presidia"></header>
+<img class="hero" src="assets/newsletter/hero_ceo.jpg" alt="Titolare di PMI industriale al lavoro, con lo stabilimento sullo sfondo">
+
+<span class="eyebrow">Il Presidio mensile &middot; Giugno 2026</span>
+<h1 class="title">Cosa sta succedendo sul fronte NIS2</h1>
+<p class="subtitle">L'aggiornamento del mese per chi vuole arrivare preparato, non rincorrere la scadenza.</p>
+<section>
+<p class="body-text">Ciao *|FNAME|*, se stai ancora cercando di capire se la NIS2 riguarda la tua azienda, giugno &egrave; un buon mese per approfondire: il 30 giugno &egrave; una scadenza chiave per chi &egrave; gi&agrave; nel perimetro, e nelle prossime settimane sempre pi&ugrave; aziende della filiera inizieranno a fare domande ai propri fornitori. Ecco cosa sta succedendo, spiegato senza tecnicismi.</p>
+<h2 class="section-title">Il fatto del mese</h2>
+<div class="box"><p class="box-title">30 giugno 2026 &mdash; categorizzazione di attivit&agrave; e servizi</p><p class="box-text">Le aziende gi&agrave; classificate come soggetti essenziali o importanti devono trasmettere all'Agenzia per la Cybersicurezza Nazionale (ACN) la categorizzazione delle proprie attivit&agrave; e dei propri servizi, come previsto dall'art. 30 del D.Lgs. 138/2024. &Egrave; un passaggio tecnico, ma il risultato pratico &egrave; concreto: da questa categorizzazione dipendono le misure di sicurezza che l'azienda dovr&agrave; adottare entro la prossima scadenza, il 31 ottobre 2026.</p></div>
+</section>
+<div class="countdown"><div class="num-days" data-deadline="2026-06-30">&nbsp;</div><div class="label">giorni alla scadenza del 30 giugno per la categorizzazione ACN</div></div>
+<section>
+<h2 class="section-title">Perché ti riguarda, anche se non sei ancora nel perimetro</h2>
+<p class="body-text">Se la tua azienda non rientra direttamente nella NIS2, queste scadenze non ti obbligano a nulla &mdash; ma probabilmente riguardano un tuo cliente. E i clienti gi&agrave; obbligati stanno cominciando a verificare la sicurezza informatica dei propri fornitori diretti, come parte della gestione del rischio di filiera prevista dalla normativa stessa. In pratica: la domanda potrebbe arrivarti prima di quanto pensi, sotto forma di questionario di sicurezza o clausola contrattuale.</p>
+<div class="box indigo"><p class="box-title">Un caso tipico <span style="font-weight:400;font-style:italic;">(scenario ipotetico)</span></p><p class="box-text">Un'azienda di componentistica elettronica con 90 dipendenti si &egrave; vista chiedere, da un cliente pi&ugrave; grande gi&agrave; obbligato dalla NIS2, un questionario dettagliato sulla propria sicurezza informatica prima di rinnovare la commessa. Non sapeva da dove iniziare &mdash; ma sono bastate tre domande semplici per capire la propria posizione.</p></div>
+<h2 class="section-title">In 3 domande, capisci se la NIS2 ti riguarda</h2>
+<ul class="checklist"><li><span class="num">1</span><span>La tua attivit&agrave; rientra tra i settori manifatturieri previsti dal decreto &mdash; elettronica, macchinari, automotive, alimentare, chimico, dispositivi medici?</span></li><li><span class="num">2</span><span>La tua azienda supera i 50 dipendenti oppure i 10 milioni di euro di fatturato o di bilancio?</span></li><li><span class="num">3</span><span>Uno dei tuoi clienti principali &egrave; gi&agrave; un soggetto obbligato dalla NIS2?</span></li></ul>
+<p id="quiz-result">Clicca su una domanda per rispondere &laquo;s&igrave;&raquo;.</p>
+<a class="btn btn-ghost" href="https://www.presidia.it/blog/nis2-pmi-industriali-perimetro" target="_blank">Leggi la guida completa sul blog &rarr;</a>
+</section>
+<hr class="divider">
+<img class="hero" src="assets/newsletter/hero_dashboard.jpg" alt="Dashboard Presidia che monitora il perimetro di sicurezza di uno stabilimento industriale">
+<section>
+<h2 class="section-title">Un passo più a fondo: webinar gratuito</h2>
+<p class="body-text">Se vuoi vedere questi criteri applicati a un caso reale del tuo settore, il prossimo webinar Presidia affronta dal vivo la categorizzazione delle attivit&agrave; secondo l'art. 30 e cosa significa in pratica per una PMI industriale &mdash; con spazio per le tue domande.</p>
+<a class="btn btn-ghost" href="https://www.presidia.it/webinar" target="_blank">Iscriviti al webinar &rarr;</a>
+</section>
+<div class="cta-banner">
+  <p class="kicker">Prima che sia il tuo cliente a chiedertelo</p>
+  <p class="headline">Scopri in 5 minuti se la tua azienda &egrave; nel perimetro NIS2</p>
+  <a class="btn btn-primary" href="https://www.presidia.it/gap-analysis" target="_blank">Richiedi la tua gap analysis gratuita</a>
+</div>
+<footer class="mail-footer">
+  <img src="assets/newsletter/logo_white.png" alt="Presidia">
+  <p>Presidia &mdash; Compliance NIS2 gestita per PMI industriali italiane.<br>Via della Cybersicurezza 12, 20121 Milano (MI) &mdash; Italia</p>
+  <p class="disclaimer">Presidia &egrave; un brand fittizio creato a scopo di case study professionale di comunicazione e digital marketing. Riferimenti normativi citati (D.Lgs. 138/2024, ACN) sono reali e verificati; il contesto aziendale &egrave; simulato.</p>
+  <p>Ricevi questa email perch&eacute; ti sei iscritto agli aggiornamenti Presidia sulla NIS2.<br>
+    <a href="#">Gestisci le preferenze</a> &nbsp;&middot;&nbsp; <a href="#">Annulla iscrizione</a> &nbsp;&middot;&nbsp; &copy; <span class="js-year"></span> Presidia
+  </p>
+</footer>
+</div>
+
+<script>
+  // Anno corrente nel footer
+  document.querySelectorAll('.js-year').forEach(function (el) {
+    el.textContent = new Date().getFullYear();
+  });
+
+  // Countdown rispetto alla data simulata di invio della newsletter (11/06/2026),
+  // non alla data reale del browser: è un contenuto dimostrativo del case study,
+  // quindi il conteggio resta coerente ogni volta che la pagina viene aperta.
+  (function () {
+    var el = document.querySelector('.countdown .num-days');
+    if (!el) return;
+    var sendDate = new Date('2026-06-11T00:00:00');
+    var deadline = new Date(el.dataset.deadline + 'T00:00:00');
+    var days = Math.round((deadline - sendDate) / 86400000);
+    el.textContent = days;
+  })();
+</script>
+
+<script>
+  // Mini self-check interattivo: click sulle 3 domande per simulare le risposte
+  (function () {
+    var items = document.querySelectorAll('.checklist li');
+    var result = document.getElementById('quiz-result');
+    if (!items.length || !result) return;
+    items.forEach(function (li) {
+      li.addEventListener('click', function () {
+        li.classList.toggle('answered-yes');
+        var yesCount = document.querySelectorAll('.checklist li.answered-yes').length;
+        if (yesCount === 0) {
+          result.textContent = 'Clicca su una domanda per rispondere "sì".';
+        } else {
+          result.textContent = 'Hai risposto sì a ' + yesCount + ' domanda' + (yesCount > 1 ? 'e' : '') +
+            ' su 3: vale la pena approfondire con la guida completa qui sotto.';
+        }
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
