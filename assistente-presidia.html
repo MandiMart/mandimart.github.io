@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Presidia Assistente Virtuale",
+  "schemaVersion": 1,
+  "description": "Assistente virtuale Presidia: chatbot HTML/CSS/JS che risponde alle 50 FAQ ufficiali del case study, con matching semantico (sinonimi, refusi, domande combinate) e nessuna fonte esterna al documento.",
+  "mcpTools": [],
+  "mcpServerNames": []
+}
+</script>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Presidia | Assistente virtuale</title>
+<meta name="description" content="Assistente virtuale Presidia — risponde alle domande frequenti su NIS2, servizi, prezzi e contatti sulla base delle FAQ ufficiali.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#17394A;
+    --ink-dark:#0F2833;
+    --teal:#4C9A8B;
+    --offwhite:#F7F5F1;
+    --sand:#E8DFD3;
+    --slate:#4A4F55;
+    --coral:#D97747;
+    --coral-dark:#c1642f;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --shadow: 0 20px 50px -12px rgba(23,57,74,0.35), 0 4px 14px rgba(23,57,74,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'IBM Plex Sans', system-ui, sans-serif;
+    color:var(--slate);
+    background:
+      radial-gradient(circle at 12% 8%, rgba(76,154,139,0.16), transparent 42%),
+      radial-gradient(circle at 88% 82%, rgba(217,119,71,0.12), transparent 45%),
+      linear-gradient(165deg, var(--offwhite) 0%, #efe9df 100%);
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+  }
+  h1,h2,h3,.brand-font{font-family:'Inter', system-ui, sans-serif;}
+
+  /* ---- page backdrop content (context, not the deliverable itself) ---- */
+  .page-wrap{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:48px 20px 140px;
+    text-align:center;
+    position:relative;
+  }
+  .page-wrap .eyebrow{
+    display:inline-block;
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:rgba(76,154,139,0.12);
+    padding:6px 14px;
+    border-radius:999px;
+    margin-bottom:18px;
+  }
+  .page-wrap h1{
+    font-size:clamp(24px,4vw,34px);
+    color:var(--ink);
+    margin:0 0 12px;
+    font-weight:800;
+  }
+  .page-wrap p{
+    max-width:520px;
+    margin:0 auto;
+    color:var(--slate);
+    font-size:15.5px;
+    line-height:1.6;
+  }
+  .fiction-note{
+    margin-top:22px;
+    font-size:12.5px;
+    color:#7a7267;
+    max-width:480px;
+  }
+
+  /* ---- floating launcher ---- */
+  .launcher{
+    position:fixed;
+    right:24px;
+    bottom:24px;
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    background:linear-gradient(155deg, var(--ink) 0%, var(--ink-dark) 100%);
+    border:none;
+    cursor:pointer;
+    box-shadow:var(--shadow);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:60;
+    transition:transform .18s ease, opacity .18s ease;
+  }
+  .launcher:hover{transform:translateY(-2px) scale(1.03);}
+  .launcher svg{width:26px;height:26px;}
+  .launcher .dot{
+    position:absolute;
+    top:6px; right:6px;
+    width:12px;height:12px;
+    border-radius:50%;
+    background:var(--coral);
+    border:2px solid var(--offwhite);
+  }
+  .launcher.hidden{opacity:0; pointer-events:none; transform:scale(.85);}
+
+  /* ---- chat panel ---- */
+  .chat-panel{
+    position:fixed;
+    right:24px;
+    bottom:24px;
+    width:400px;
+    max-width:calc(100vw - 32px);
+    height:min(660px, calc(100vh - 48px));
+    background:#fff;
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    z-index:70;
+    transform-origin:bottom right;
+    transition:transform .22s ease, opacity .18s ease;
+  }
+  .chat-panel.closed{
+    transform:scale(.92) translateY(12px);
+    opacity:0;
+    pointer-events:none;
+  }
+
+  .chat-header{
+    background:linear-gradient(150deg, var(--ink) 0%, var(--ink-dark) 100%);
+    color:#fff;
+    padding:16px 16px 16px 18px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    position:relative;
+    flex-shrink:0;
+  }
+  .chat-header::after{
+    content:"";
+    position:absolute; inset:0;
+    background-image:radial-gradient(circle, rgba(255,255,255,0.5) 1px, transparent 1.4px);
+    background-size:16px 16px;
+    opacity:.06;
+    pointer-events:none;
+  }
+  .avatar-p{
+    width:40px;height:40px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    border:1.5px solid rgba(255,255,255,0.35);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .avatar-p svg{width:20px;height:20px;}
+  .chat-header .titles{flex:1; min-width:0;}
+  .chat-header .titles h1{
+    font-size:15.5px; margin:0; font-weight:700; letter-spacing:.01em;
+  }
+  .chat-header .titles p{
+    margin:2px 0 0; font-size:12px; color:rgba(255,255,255,0.75);
+    display:flex; align-items:center; gap:6px;
+  }
+  .status-dot{
+    width:7px;height:7px;border-radius:50%;background:#6fd39a;
+    box-shadow:0 0 0 2px rgba(111,211,154,0.25);
+    flex-shrink:0;
+  }
+  .icon-btn{
+    background:rgba(255,255,255,0.1);
+    border:none;
+    width:32px;height:32px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    color:#fff;
+    flex-shrink:0;
+    transition:background .15s ease;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,0.22);}
+  .icon-btn svg{width:16px;height:16px;}
+
+  .chat-body{
+    flex:1;
+    overflow-y:auto;
+    padding:18px 14px 8px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(76,154,139,0.06), transparent 40%),
+      var(--offwhite);
+  }
+  .chat-body::-webkit-scrollbar{width:8px;}
+  .chat-body::-webkit-scrollbar-thumb{background:#d8d0c3;border-radius:8px;}
+
+  .msg-row{display:flex; gap:8px; max-width:100%;}
+  .msg-row.user{flex-direction:row-reverse;}
+  .msg-avatar{
+    width:26px;height:26px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--ink); color:#fff; margin-top:2px;
+  }
+  .msg-avatar svg{width:13px;height:13px;}
+  .msg-row.user .msg-avatar{background:var(--sand); color:var(--ink);}
+
+  .bubble{
+    padding:10px 13px;
+    border-radius:var(--radius-md);
+    font-size:14px;
+    line-height:1.5;
+    max-width:78%;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+  }
+  .msg-row.bot .bubble{
+    background:#fff;
+    color:var(--slate);
+    border:1px solid #ece5d8;
+    border-top-left-radius:4px;
+  }
+  .msg-row.user .bubble{
+    background:var(--ink);
+    color:#fff;
+    border-top-right-radius:4px;
+  }
+  .msg-row.bot .bubble.fallback{
+    border-color:rgba(217,119,71,0.35);
+    background:#fdf5ef;
+  }
+  .msg-time{
+    font-size:10.5px;
+    color:#a99f8f;
+    margin-top:4px;
+  }
+  .msg-row.user .msg-time{text-align:right;}
+
+  .typing-row .bubble{
+    display:flex; align-items:center; gap:4px;
+    padding:12px 14px;
+  }
+  .typing-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:#b9b1a2;
+    animation:blink 1.2s infinite ease-in-out;
+  }
+  .typing-dot:nth-child(2){animation-delay:.18s;}
+  .typing-dot:nth-child(3){animation-delay:.36s;}
+  @keyframes blink{
+    0%,80%,100%{opacity:.25; transform:translateY(0);}
+    40%{opacity:1; transform:translateY(-2px);}
+  }
+
+  .chips{
+    display:flex; flex-wrap:wrap; gap:7px;
+    padding:2px 14px 12px;
+    flex-shrink:0;
+  }
+  .chip{
+    border:1px solid #ded5c5;
+    background:#fff;
+    color:var(--ink);
+    font-size:12.5px;
+    padding:7px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s ease, border-color .15s ease;
+    font-family:inherit;
+  }
+  .chip:hover{background:var(--sand); border-color:var(--teal);}
+
+  .chat-input-row{
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    padding:12px 12px;
+    border-top:1px solid #ece5d8;
+    background:#fff;
+    flex-shrink:0;
+  }
+  .chat-input-row textarea{
+    flex:1;
+    resize:none;
+    border:1.5px solid #e4dccd;
+    border-radius:var(--radius-sm);
+    padding:10px 12px;
+    font-family:inherit;
+    font-size:14px;
+    color:var(--slate);
+    max-height:96px;
+    line-height:1.4;
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  .chat-input-row textarea:focus{border-color:var(--teal);}
+  .send-btn{
+    width:40px;height:40px;
+    border-radius:50%;
+    border:none;
+    background:var(--coral);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .send-btn:hover{background:var(--coral-dark);}
+  .send-btn:active{transform:scale(.94);}
+  .send-btn:disabled{background:#e0d6c8; cursor:not-allowed;}
+  .send-btn svg{width:17px;height:17px;}
+
+  .chat-footer-note{
+    font-size:10.5px;
+    color:#a99f8f;
+    text-align:center;
+    padding:0 14px 12px;
+    line-height:1.5;
+    flex-shrink:0;
+  }
+
+  @media (max-width: 640px){
+    .chat-panel{
+      right:0; bottom:0; left:0; top:0;
+      width:100%; max-width:100%;
+      height:100%; height:100dvh;
+      border-radius:0;
+    }
+    .launcher{right:18px; bottom:18px;}
+    .page-wrap{padding-bottom:110px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="page-wrap">
+  <span class="eyebrow">Case study — progetto fittizio</span>
+  <h1>Assistente virtuale Presidia</h1>
+  <p>Risponde alle domande più frequenti su normativa NIS2, servizi, prezzi e contatti, basandosi esclusivamente sulle FAQ ufficiali dell'azienda. Apri la chat in basso a destra per provarlo.</p>
+  <p class="fiction-note">Presidia è un brand fittizio creato a scopo di case study professionale di comunicazione e digital marketing — non rappresenta un'azienda reale.</p>
+</div>
+
+<!-- Floating launcher -->
+<button class="launcher" id="launcher" aria-label="Apri l'assistente virtuale Presidia">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+  <span class="dot"></span>
+</button>
+
+<!-- Chat panel -->
+<section class="chat-panel closed" id="chatPanel" aria-live="polite">
+  <header class="chat-header">
+    <div class="avatar-p">
+      <svg viewBox="0 0 48 48" fill="none"><path d="M24 8c8 0 13 5 13 12s-5 12-13 12" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/><path d="M24 8v32" stroke="#fff" stroke-width="3.4" stroke-linecap="round"/></svg>
+    </div>
+    <div class="titles">
+      <h1>Assistente Presidia</h1>
+      <p><span class="status-dot"></span> Online — risponde in base alle FAQ ufficiali</p>
+    </div>
+    <button class="icon-btn" id="closeBtn" aria-label="Chiudi la chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </header>
+
+  <div class="chat-body" id="chatBody"></div>
+
+  <div class="chips" id="chips">
+    <button class="chip" type="button">Quanto costa il servizio?</button>
+    <button class="chip" type="button">La NIS2 riguarda anche la mia azienda?</button>
+    <button class="chip" type="button">Come funziona la gap analysis?</button>
+    <button class="chip" type="button">Come vi contatto?</button>
+  </div>
+
+  <form class="chat-input-row" id="chatForm">
+    <textarea id="chatInput" rows="1" placeholder="Scrivi la tua domanda su Presidia..." aria-label="Scrivi un messaggio"></textarea>
+    <button class="send-btn" type="submit" id="sendBtn" aria-label="Invia messaggio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+    </button>
+  </form>
+  <p class="chat-footer-note">Assistente virtuale dimostrativo — Presidia è un progetto simulato di case study. Le risposte si basano esclusivamente sulle FAQ ufficiali.</p>
+</section>
+
+<script>
+(function(){
+"use strict";
+
+/* =========================================================================
+   1) BASE DI CONOSCENZA — le 50 FAQ ufficiali di Presidia (unica fonte)
+   ========================================================================= */
+var FAQ = [
+{id:1, cat:"Chi è Presidia", q:"Che cos'è Presidia?", a:"Presidia è una piattaforma di compliance cyber gestita, pensata per accompagnare le PMI manifatturiere italiane nell'adeguamento alla direttiva NIS2 (recepita in Italia con il D.Lgs. 138/2024). Uniamo una piattaforma digitale a un affiancamento umano specializzato nel settore manifatturiero, così non lasciamo la tua azienda sola davanti a un obbligo normativo complesso.",
+ kw:["cos'è presidia","cosa fa presidia","cosa fate","chi siete","di cosa vi occupate","che azienda siete","cosa offrite","piattaforma compliance","compliance cyber gestita","in cosa consiste presidia"]},
+{id:2, cat:"Chi è Presidia", q:"Presidia è una software house o una società di consulenza?", a:"Nessuna delle due nel senso tradizionale: siamo un servizio ibrido. La piattaforma gestisce scadenze, misure di sicurezza minime e reportistica, ma ogni cliente ha anche un referente umano che segue il percorso passo dopo passo. Non ti lasciamo soli con un tool, né ti vendiamo solo ore di consulenza.",
+ kw:["software house","società di consulenza","solo software","solo consulenza","siete una software house","che tipo di azienda siete","servizio ibrido"]},
+{id:3, cat:"Chi è Presidia", q:"Da quanto tempo opera Presidia?", a:"Presidia nasce nel 2026 in risposta diretta alla direttiva NIS2 e alla scadenza ACN del 31 ottobre 2026 per l'implementazione delle misure minime di sicurezza. Siamo un'azienda giovane, verticale su un problema molto specifico e molto attuale.",
+ kw:["da quanto tempo","quando è nata","quando nasce presidia","anno di fondazione","da quando esistete","quanti anni ha presidia"]},
+{id:4, cat:"Chi è Presidia", q:"In quali settori lavora Presidia?", a:"Lavoriamo esclusivamente con PMI manifatturiere che rientrano negli Allegati I-IV del D.Lgs. 138/2024: elettronica, macchinari, automotive, chimico, dispositivi medici e alimentare. Non facciamo cybersecurity generalista: conosciamo i processi e i vincoli specifici di questi settori.",
+ kw:["settori","con chi lavorate","tipologia di aziende","industrie","elettronica","automotive","macchinari","chimico","dispositivi medici","alimentare","manifatturiero","allegati"]},
+{id:5, cat:"Chi è Presidia", q:"Presidia lavora solo con aziende italiane?", a:"Sì, oggi il nostro focus è interamente sul mercato italiano e sul quadro normativo definito dall'Agenzia per la Cybersicurezza Nazionale (ACN). È il contesto che conosciamo meglio ed è dove possiamo garantire il maggior valore.",
+ kw:["aziende italiane","estero","internazionale","fuori italia","altri paesi","mercato estero","lavorate all'estero","solo italia"]},
+{id:6, cat:"Chi è Presidia", q:"Dove ha sede Presidia?", a:"La sede è a Brescia, in Via dell'Innovazione 12, nel cuore di uno dei distretti manifatturieri più importanti del Nord Italia.",
+ kw:["sede","dove siete","indirizzo","ufficio","dove si trova presidia","brescia","dove trovarvi"]},
+{id:7, cat:"Chi è Presidia", q:"Presidia ha certificazioni di sicurezza?", a:"Sì. Applichiamo alla nostra organizzazione gli stessi standard che raccomandiamo ai clienti: siamo certificati ISO/IEC 27001 per la sicurezza delle informazioni e ISO 9001 per la gestione della qualità, con un team che include Lead Auditor ISO 27001 e specialisti GDPR.",
+ kw:["certificazioni","iso 27001","iso 9001","certificati","accreditamenti","lead auditor","siete certificati"]},
+
+{id:8, cat:"NIS2", q:"Che cos'è la direttiva NIS2?", a:"È una normativa europea sulla sicurezza informatica, recepita in Italia con il D.Lgs. 138/2024, che obbliga migliaia di aziende — comprese molte PMI manifatturiere — ad adottare misure di sicurezza minime, gestire gli incidenti secondo tempistiche precise e mantenere una documentazione verificabile in caso di audit.",
+ kw:["cos'è la nis2","cosa significa nis2","normativa nis2","direttiva europea","spiegami la nis2","d.lgs 138/2024","dlgs 138 2024"]},
+{id:9, cat:"NIS2", q:"Come faccio a sapere se la mia azienda rientra nel perimetro NIS2?", a:"Dipende dal settore in cui operi e dalla dimensione della tua azienda, non è automatico. Il primo passo che facciamo insieme è la gap analysis: in pochi giorni ti diciamo con certezza se rientri nel perimetro e con quale ruolo.",
+ kw:["rientro nel perimetro","la mia azienda rientra","sono obbligato","siamo obbligati","devo adeguarmi","mi riguarda la nis2","verifica perimetro","sono soggetto alla nis2"]},
+{id:10, cat:"NIS2", q:"Cosa significa essere \"soggetto essenziale\" o \"soggetto importante\"?", a:"Sono le due categorie previste dalla NIS2, con obblighi e livelli di sanzione diversi. La differenza dipende da settore, dimensione e criticità dell'attività svolta. Te lo chiariamo nella gap analysis, in termini comprensibili e non nel linguaggio tecnico del decreto.",
+ kw:["soggetto essenziale","soggetto importante","differenza tra soggetti","categorie nis2","che ruolo ho"]},
+{id:11, cat:"NIS2", q:"Quali sono le scadenze da rispettare?", a:"La scadenza più vicina fissata dall'ACN per l'implementazione delle misure minime di sicurezza è il 31 ottobre 2026. Le scadenze specifiche per la tua azienda dipendono comunque dal ruolo assegnato: te le indichiamo con precisione dopo la gap analysis.",
+ kw:["scadenze","scadenza","entro quando","termine","deadline","31 ottobre 2026","quando scade","tempistiche normativa","data limite"]},
+{id:12, cat:"NIS2", q:"Cosa rischia un'azienda che non si adegua alla NIS2?", a:"Le sanzioni possono arrivare fino a 7 milioni di euro o all'1,4% del fatturato annuo per i soggetti importanti. Ma spesso il rischio più concreto per una PMI non è la sanzione in sé, quanto perdere commesse con clienti più grandi che iniziano a chiedere garanzie di conformità ai propri fornitori.",
+ kw:["rischi","sanzioni","multa","penali","cosa succede se non mi adeguo","conseguenze non conformità","7 milioni","1,4% fatturato"]},
+{id:13, cat:"NIS2", q:"La NIS2 riguarda solo le grandi aziende?", a:"No, ed è uno degli equivoci più diffusi. La direttiva coinvolge anche molte PMI manifatturiere, soprattutto quelle che fanno parte della filiera di aziende più grandi già obbligate. Oltre 20.000 aziende italiane dovranno adeguarsi entro il 2027.",
+ kw:["solo grandi aziende","riguarda anche le pmi","piccole aziende","solo multinazionali","vale anche per piccole imprese","anche noi piccoli"]},
+{id:14, cat:"NIS2", q:"Il mio cliente più grande mi ha chiesto garanzie di conformità cyber: cosa significa?", a:"Significa che il tuo cliente, essendo probabilmente già un soggetto obbligato dalla NIS2, deve verificare la conformità della propria filiera diretta. È un segnale che vale la pena prendere sul serio: la gap analysis ti dice subito qual è la tua posizione reale.",
+ kw:["cliente mi chiede garanzie","cliente più grande","filiera","fornitore obbligato","supply chain obblighi","richiesta del cliente"]},
+{id:15, cat:"NIS2", q:"Cosa devo fare se scopro di essere nel perimetro NIS2 a ridosso della scadenza?", a:"Meglio muoversi subito: definiamo insieme un piano d'azione con le priorità più urgenti, così da coprire prima le misure minime obbligatorie e poi completare il percorso di conformità nei mesi successivi.",
+ kw:["ridosso della scadenza","poco tempo","siamo in ritardo","ultimo momento","scopro tardi","tempo stretto","urgenza scadenza"]},
+{id:16, cat:"NIS2", q:"Come funziona la segnalazione di un incidente secondo la NIS2?", a:"La normativa prevede uno schema a tempi stretti: una prima notifica entro 24 ore dall'incidente, un aggiornamento entro 72 ore e una relazione finale entro un mese. Ti supportiamo direttamente in ognuno di questi passaggi, così non li affronti da solo nel momento più delicato.",
+ kw:["segnalazione incidente","notifica incidente","24h 72h","72 ore","incidente di sicurezza","attacco informatico","data breach","violazione dati"]},
+
+{id:17, cat:"Servizi", q:"Quali servizi offre Presidia?", a:"Gap analysis iniziale, piattaforma di monitoraggio della conformità, formazione cybersecurity per il personale, supporto nella gestione e segnalazione degli incidenti, monitoraggio della conformità dei fornitori diretti e check-up annuale di aggiornamento normativo.",
+ kw:["servizi","cosa offrite","cosa fate esattamente","elenco servizi","cosa comprende il servizio"]},
+{id:18, cat:"Servizi", q:"Cos'è la gap analysis iniziale e come funziona?", a:"È il punto di partenza di ogni percorso con Presidia: verifichiamo se la tua azienda rientra nel perimetro NIS2 e con quale ruolo, prima ancora di parlare di soluzioni. Richiede pochi giorni e non impegna la tua azienda a nulla.",
+ kw:["gap analysis","analisi iniziale","valutazione iniziale","prima verifica","come funziona la gap analysis"]},
+{id:19, cat:"Servizi", q:"Cosa include la piattaforma di monitoraggio?", a:"Una dashboard pensata per chi non è tecnico, con scadenze, misure di sicurezza minime da implementare e reportistica già pronta per audit e controlli. Tutto in un unico posto, sempre visibile.",
+ kw:["piattaforma","dashboard","monitoraggio","cosa include la piattaforma","funzionalità piattaforma"]},
+{id:20, cat:"Servizi", q:"La piattaforma richiede competenze tecniche per essere usata?", a:"No, è pensata proprio per aziende senza un team di sicurezza interno. Ed è comunque affiancata da un referente umano, quindi non ti troverai mai da solo davanti a una schermata che non capisci.",
+ kw:["competenze tecniche","facile da usare","serve un tecnico","difficile da usare","serve personale it","è complicata la piattaforma"]},
+{id:21, cat:"Servizi", q:"Cosa include la formazione per il personale?", a:"Percorsi di cybersecurity awareness snelli e non tecnici, pensati per essere seguiti anche da chi non ha mai affrontato questi temi prima. L'obiettivo è ridurre il rischio umano, spesso il punto più debole della sicurezza aziendale.",
+ kw:["formazione","training","corso per dipendenti","cybersecurity awareness","formare il personale","corsi per lo staff"]},
+{id:22, cat:"Servizi", q:"Presidia si occupa anche dei fornitori della mia azienda (supply chain)?", a:"Sì, monitoriamo la conformità della tua filiera diretta: è un aspetto sempre più rilevante, perché anche i tuoi fornitori possono rappresentare un rischio per la tua conformità complessiva.",
+ kw:["fornitori","supply chain","filiera fornitori","monitorate i fornitori","conformità fornitori","subfornitori"]},
+{id:23, cat:"Servizi", q:"Cosa succede dopo l'attivazione del servizio?", a:"Dopo la gap analysis, costruiamo insieme un piano d'azione con le misure da implementare per priorità, attiviamo la piattaforma e ti assegniamo un referente umano di riferimento per tutto il percorso.",
+ kw:["dopo l'attivazione","dopo aver firmato","prossimi passi","onboarding","cosa succede dopo aver aderito"]},
+{id:24, cat:"Servizi", q:"Presidia sostituisce un consulente legale o un DPO?", a:"No. Presidia si occupa della conformità operativa alla NIS2 — misure di sicurezza, scadenze, gestione incidenti — ma non fornisce consulenza legale né sostituisce le figure previste da altre normative, come il DPO per il GDPR. Dove serve, ti indichiamo quando è opportuno coinvolgere un professionista esterno.",
+ kw:["consulente legale","dpo","avvocato","sostituite il legale","serve anche un legale","serve un dpo separato"]},
+
+{id:25, cat:"Prezzi", q:"Quanto costa il servizio Presidia?", a:"Il costo varia in base alla dimensione dell'azienda e alla complessità del perimetro da coprire, indicativamente tra 6.000 e 15.000 euro l'anno. Il prezzo esatto viene definito dopo la gap analysis, quando conosciamo davvero la tua situazione.",
+ kw:["quanto costa","prezzo","costo","tariffa","quanto si spende","budget necessario","prezzi"]},
+{id:26, cat:"Prezzi", q:"Come è strutturato il prezzo?", a:"È un abbonamento annuale a scaglioni in base a dimensione e complessità aziendale, che include piattaforma e supporto umano. A questo si aggiunge una fee una tantum di attivazione per la gap analysis iniziale.",
+ kw:["come è strutturato il prezzo","modello di prezzo","abbonamento","come funziona il pagamento","fasce di prezzo"]},
+{id:27, cat:"Prezzi", q:"C'è un costo di attivazione oltre all'abbonamento?", a:"Sì, la gap analysis iniziale ha una fee una tantum separata dall'abbonamento annuale. Te la comunichiamo in modo trasparente prima di iniziare, senza sorprese in fattura.",
+ kw:["costo di attivazione","fee attivazione","costo iniziale","oltre all'abbonamento","spese aggiuntive iniziali"]},
+{id:28, cat:"Prezzi", q:"Qual è la durata minima del contratto?", a:"Il servizio è pensato come un percorso continuativo, coerente con una normativa che si evolve nel tempo: l'abbonamento è annuale. I dettagli contrattuali specifici vengono definiti nella proposta commerciale, dopo la gap analysis.",
+ kw:["durata contratto","durata minima","quanto dura il contratto","vincolo contrattuale","posso disdire"]},
+{id:29, cat:"Prezzi", q:"Posso richiedere un preventivo personalizzato?", a:"Certo. Dopo la gap analysis ti presentiamo una proposta commerciale su misura per la tua azienda, con condizioni chiare e senza impegno fino a quel momento.",
+ kw:["preventivo","preventivo personalizzato","offerta su misura","preventivo gratuito"]},
+{id:30, cat:"Prezzi", q:"Ci sono costi nascosti?", a:"No. La chiarezza è uno dei nostri valori: ogni voce di costo — abbonamento, fee di attivazione, eventuali upsell su formazione o gestione incidenti — viene comunicata prima della firma, non scoperta dopo.",
+ kw:["costi nascosti","costi extra","sorprese in fattura","tutto incluso nel prezzo","spese impreviste"]},
+
+{id:31, cat:"Percorso", q:"Come inizio un percorso con Presidia?", a:"Basta scrivere a consulenza@presidia.it, chiamare o compilare il modulo sul sito: ti rispondiamo entro un giorno lavorativo con una prima valutazione, senza impegno.",
+ kw:["come inizio","come parto","primo passo","come vi contatto per iniziare","come attivo il servizio","come si comincia"]},
+{id:32, cat:"Percorso", q:"Quanto tempo richiede la gap analysis?", a:"In genere pochi giorni: ti diciamo in tempi rapidi se la tua azienda rientra nel perimetro NIS2 e con quale ruolo, così puoi decidere i prossimi passi senza restare in attesa a lungo.",
+ kw:["quanto tempo richiede la gap analysis","tempi gap analysis","durata gap analysis"]},
+{id:33, cat:"Percorso", q:"Quanto tempo serve per diventare conformi?", a:"Dipende dal punto di partenza della tua azienda e dalla complessità del perimetro, ma dopo la gap analysis definiamo insieme un piano con tempistiche realistiche, dando priorità alle misure minime obbligatorie richieste dall'ACN.",
+ kw:["quanto tempo per essere conformi","tempi di adeguamento","quanto ci vuole per adeguarsi","tempistiche conformità"]},
+{id:34, cat:"Percorso", q:"Cosa succede se la mia azienda non rientra nel perimetro NIS2?", a:"Te lo comunichiamo comunque con chiarezza al termine della gap analysis, senza cercare di venderti qualcosa che non ti serve. In alcuni casi può comunque essere utile un check periodico, perché il perimetro normativo può evolvere.",
+ kw:["non rientro nel perimetro","non sono obbligato","se non rientro cosa succede","esclusi dalla nis2"]},
+{id:35, cat:"Percorso", q:"Devo fornire dati sensibili durante la gap analysis?", a:"No, la gap analysis iniziale si basa su informazioni relative a settore, dimensione e attività della tua azienda — non su dati sensibili o riservati. Eventuali dati più dettagliati vengono richiesti solo nelle fasi successive, con le dovute garanzie contrattuali.",
+ kw:["dati sensibili","dati riservati","informazioni richieste per la gap analysis","privacy durante l'analisi"]},
+
+{id:36, cat:"Privacy", q:"Come vengono trattati i dati della mia azienda?", a:"Applichiamo internamente gli stessi standard di sicurezza che raccomandiamo ai nostri clienti, certificati ISO/IEC 27001. I dati che raccogliamo servono esclusivamente a erogare il servizio e a mantenere aggiornata la tua posizione di conformità.",
+ kw:["trattamento dati","come gestite i dati","sicurezza dei nostri dati","dove finiscono i miei dati"]},
+{id:37, cat:"Privacy", q:"Presidia è conforme al GDPR?", a:"Sì, il trattamento dei dati segue i principi del GDPR e il nostro team include competenze specialistiche in materia di protezione dei dati.",
+ kw:["gdpr","conformi al gdpr","privacy normativa","rispettate il gdpr","protezione dati personali"]},
+{id:38, cat:"Privacy", q:"I dati vengono condivisi con terzi?", a:"No, salvo i casi previsti dal contratto o richiesti dalla legge (ad esempio in caso di audit). Non vendiamo né cediamo i dati dei clienti a terze parti per finalità commerciali.",
+ kw:["condivisi con terzi","vendete i dati","cedete i dati","terze parti","chi vede i nostri dati"]},
+
+{id:39, cat:"Supporto", q:"Che tipo di supporto è incluso nell'abbonamento?", a:"Ogni piano include un referente umano specializzato nel settore manifatturiero, oltre all'accesso alla piattaforma. Non lasciamo mai un cliente da solo davanti a un software.",
+ kw:["supporto incluso","assistenza inclusa","cosa comprende il supporto","che aiuto ricevo"]},
+{id:40, cat:"Supporto", q:"Ho un referente umano dedicato o solo un software?", a:"Hai entrambi: la piattaforma per la gestione operativa e un referente umano che segue il tuo percorso, risponde alle domande e ti affianca nei momenti più delicati, come la gestione di un incidente.",
+ kw:["referente umano","persona dedicata","solo software","parlo con qualcuno","contatto umano"]},
+{id:41, cat:"Supporto", q:"In quanto tempo Presidia risponde a una richiesta?", a:"Rispondiamo entro un giorno lavorativo con una prima valutazione. Per le segnalazioni di incidenti, i tempi sono quelli previsti dallo schema normativo (24h/72h/1 mese), che gestiamo insieme a te.",
+ kw:["tempo di risposta","quanto ci mettete a rispondere","tempi di risposta","risposta rapida"]},
+{id:42, cat:"Supporto", q:"Cosa succede se la normativa cambia dopo l'attivazione?", a:"È uno dei motivi per cui esiste il check-up annuale: aggiorniamo il tuo piano di conformità a ogni evoluzione del D.Lgs. 138/2024 e del quadro ACN, così non devi seguire tu gli aggiornamenti normativi.",
+ kw:["normativa cambia","aggiornamenti normativi","se la legge cambia","check-up annuale"]},
+
+{id:43, cat:"Consulenti", q:"Presidia lavora con commercialisti e consulenti d'impresa?", a:"Sì. Molti consulenti ricevono domande sulla NIS2 dai propri clienti senza avere una risposta tecnica pronta: Presidia può diventare il partner a cui indirizzarli con sicurezza, mantenendo la tua relazione di fiducia con il cliente.",
+ kw:["commercialisti","consulenti d'impresa","collaborate con commercialisti","partnership consulenti"]},
+{id:44, cat:"Consulenti", q:"Posso segnalare i miei clienti a Presidia?", a:"Sì, lavoriamo con un programma di partnership pensato per consulenti e associazioni di categoria, con materiale co-brandizzabile da condividere con i vostri clienti.",
+ kw:["segnalare clienti","referral","programma partner","posso presentarvi un cliente"]},
+{id:45, cat:"Consulenti", q:"Presidia fornisce materiale informativo da condividere con i clienti?", a:"Sì: white paper sintetici, checklist e guide pratiche pensate per essere condivise così come sono, per aiutarti a rispondere alle prime domande dei tuoi clienti sulla NIS2.",
+ kw:["materiale informativo","white paper","guide da condividere","materiale per i clienti","brochure"]},
+
+{id:46, cat:"Perché Presidia", q:"In cosa Presidia si differenzia da altri fornitori di compliance NIS2?", a:"Su tre punti: siamo verticali solo sul manifatturiero (non cybersecurity generalista), uniamo sempre piattaforma e persona — mai un tool lasciato in autonomia — e il prezzo e il linguaggio sono pensati per una PMI, non adattati da un'offerta enterprise.",
+ kw:["differenza dai concorrenti","perché scegliervi","cosa vi distingue","vantaggio competitivo","rispetto alla concorrenza"]},
+{id:47, cat:"Perché Presidia", q:"Perché scegliere Presidia invece di gestire la NIS2 internamente?", a:"Se non hai già competenze di sicurezza informatica dedicate, il rischio è impiegare molto tempo interno per interpretare una normativa complessa, con margine di errore alto. Presidia ti dà un percorso già strutturato, verificato e aggiornato, con un referente che risponde alle tue domande.",
+ kw:["gestire internamente","fare da soli","perché non farlo da soli","vale la pena affidarsi a voi","fai da te"]},
+{id:48, cat:"Perché Presidia", q:"Presidia lavora anche con aziende fuori dal settore manifatturiero?", a:"Oggi no: la nostra scelta è restare verticali sulle PMI manifatturiere rientranti negli Allegati I-IV del D.Lgs. 138/2024, perché è lì che possiamo garantire competenza reale e non una copertura generica.",
+ kw:["fuori dal manifatturiero","altri settori","settori diversi dal manifatturiero","non siamo manifatturieri"]},
+
+{id:49, cat:"Altro", q:"Presidia è un'azienda reale?", a:"No. Presidia è un brand fittizio, creato esclusivamente a scopo di case study professionale di comunicazione e digital marketing. Non rappresenta un'azienda realmente operativa e non eroga servizi reali.",
+ kw:["azienda reale","esistete davvero","è tutto vero","siete una vera azienda","progetto simulato","è finto"]},
+{id:50, cat:"Altro", q:"Come posso contattare Presidia?", a:"Email: consulenza@presidia.it — Telefono: +39 030 1234567 — Sede: Via dell'Innovazione 12, Brescia (BS). Rispondiamo entro un giorno lavorativo con una prima valutazione, senza impegno.",
+ kw:["contatti","come vi contatto","come faccio a contattarvi","come posso contattarvi","voglio contattarvi","recapiti","email","telefono","numero di telefono","indirizzo email","parlare con voi","dove vi trovo"]}
+];
+
+var FALLBACK = "Non dispongo di informazioni sufficienti per rispondere con precisione a questa domanda. Ti consiglio di contattare direttamente consulenza@presidia.it.";
+var MIN_SCORE = 0.35;
+var AMBIG_MARGIN = 0.15;
+
+/* =========================================================================
+   2) MOTORE DI MATCHING SEMANTICO (sinonimi, refusi, riformulazioni)
+   ========================================================================= */
+var STOPWORDS = {};
+["il","lo","la","i","gli","le","di","a","da","in","con","su","per","tra","fra","un","uno","una","che","chi","cosa","come","dove","quando","perche","e","ed","o","od","non","mi","ti","si","ci","vi","del","dello","della","dei","degli","delle","al","allo","alla","ai","agli","alle","nel","nello","nella","nei","negli","nelle","sono","ho","hai","ha","abbiamo","avete","hanno","mio","mia","miei","mie","tuo","tua","vostro","vostra","questo","questa","quello","quella","posso","puo","deve","essere","fare","anche","ancora","molto","cioe","se","ma","pero","gentilmente","cortesemente","vorrei","sapere","volevo","chiedere","chiedervi"]
+  .forEach(function(w){ STOPWORDS[w] = true; });
+
+function stripAccents(s){
+  return s.replace(/[àáâä]/g,"a").replace(/[èéêë]/g,"e").replace(/[ìíîï]/g,"i")
+          .replace(/[òóôö]/g,"o").replace(/[ùúûü]/g,"u").replace(/ç/g,"c").replace(/ñ/g,"n");
+}
+function normalize(str){
+  return stripAccents(String(str).toLowerCase())
+    .replace(/['’]/g," ")
+    .replace(/[^a-z0-9\s]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+function tokenize(str){
+  return normalize(str).split(" ").filter(function(t){ return t.length>0 && !STOPWORDS[t]; });
+}
+function levenshtein(a,b){
+  var m=a.length, n=b.length;
+  if(m===0) return n;
+  if(n===0) return m;
+  var dp = new Array(n+1);
+  for(var j=0;j<=n;j++) dp[j]=j;
+  for(var i=1;i<=m;i++){
+    var prev = dp[0]; dp[0]=i;
+    for(j=1;j<=n;j++){
+      var tmp = dp[j];
+      dp[j] = Math.min(dp[j]+1, dp[j-1]+1, prev + (a[i-1]===b[j-1]?0:1));
+      prev = tmp;
+    }
+  }
+  return dp[n];
+}
+function tokenSim(a,b){
+  if(a===b) return 1;
+  var maxLen = Math.max(a.length,b.length);
+  if(maxLen<=3) return 0;
+  var dist = levenshtein(a,b);
+  var threshold = maxLen<=5 ? 1 : (maxLen<=8 ? 2 : 3);
+  if(dist<=threshold) return Math.max(0, 1-(dist/maxLen)*0.6);
+  return 0;
+}
+
+FAQ.forEach(function(e){
+  var qTokens = tokenize(e.q);
+  var kwTokens = [];
+  e.kw.forEach(function(p){ kwTokens = kwTokens.concat(tokenize(p)); });
+  var seen = {}, all = [];
+  qTokens.concat(kwTokens).forEach(function(t){ if(!seen[t]){ seen[t]=true; all.push(t); } });
+  e._allTokens = all;
+  var phraseSeen = {}, phrases = [normalize(e.q)];
+  e.kw.forEach(function(k){ if(k.indexOf(" ")>-1) phrases.push(normalize(k)); });
+  phrases.forEach(function(p){ phraseSeen[p]=true; });
+  e._phrases = Object.keys(phraseSeen);
+});
+
+function scoreEntry(queryTokens, queryNorm, entry){
+  var matched = 0;
+  var total = Math.max(queryTokens.length,1);
+  entry._phrases.forEach(function(phrase){
+    if(phrase.length>=4 && queryNorm.indexOf(phrase)>-1) matched += 2.5;
+  });
+  queryTokens.forEach(function(qt){
+    var best = 0;
+    for(var i=0;i<entry._allTokens.length;i++){
+      var s = tokenSim(qt, entry._allTokens[i]);
+      if(s>best) best=s;
+      if(best===1) break;
+    }
+    matched += best;
+  });
+  return matched/total;
+}
+
+function rank(query){
+  var queryNorm = normalize(query);
+  var queryTokens = tokenize(query);
+  var scores = FAQ.map(function(e){
+    return {id:e.id, entry:e, score: scoreEntry(queryTokens, queryNorm, e)};
+  });
+  scores.sort(function(a,b){ return b.score-a.score; });
+  return scores;
+}
+
+function splitQuestions(raw){
+  var text = raw.trim();
+  var parts = text.split(/[?;\n]+/);
+  var result = [];
+  parts.forEach(function(p){
+    var clauses = p.split(/\s+e\s+(?=(?:inoltre|anche|poi|dove|quando|come|cosa|quanto|quali|quale|chi|perche)\b)/i);
+    clauses.forEach(function(c){ if(c.trim().length>=3) result.push(c.trim()); });
+  });
+  return result.length ? result : [text];
+}
+
+function classify(part){
+  var r = rank(part);
+  var top1 = r[0], top2 = r[1];
+  if(top1.score < MIN_SCORE){
+    return {type:"fallback"};
+  }
+  if(top2.score >= MIN_SCORE && (top1.score - top2.score) < AMBIG_MARGIN && top1.id!==top2.id){
+    return {type:"ambiguous", a:top1.entry, b:top2.entry};
+  }
+  return {type:"answer", entry:top1.entry};
+}
+
+/* =========================================================================
+   3) PICCOLE INTERAZIONI CONVERSAZIONALI (non sono fatti sull'azienda)
+   ========================================================================= */
+function smallTalk(raw){
+  var t = normalize(raw);
+  var wc = t.split(" ").filter(Boolean).length;
+  if(wc>6) return null;
+  if(/^(ciao|salve|buongiorno|buonasera|buon pomeriggio|hey|ehi|oi)\b/.test(t)){
+    return "Ciao! Sono l'assistente virtuale di Presidia. Chiedimi pure informazioni sulla direttiva NIS2, sui nostri servizi, sui prezzi o su come contattarci.";
+  }
+  if(/\b(grazie|graz)\b/.test(t)){
+    return "Di nulla! Se hai altre domande su Presidia, sono qui.";
+  }
+  if(/^(chi sei|cosa sai fare|cosa puoi fare|come funzioni|aiuto|help)\b/.test(t)){
+    return "Sono l'assistente virtuale di Presidia: rispondo alle domande più frequenti su normativa NIS2, servizi, prezzi, percorso di attivazione e contatti. Scrivimi pure la tua domanda.";
+  }
+  if(/^(arrivederci|a presto|alla prossima)\b/.test(t)){
+    return "A presto! Per qualsiasi necessità puoi scrivere a consulenza@presidia.it.";
+  }
+  return null;
+}
+
+/* =========================================================================
+   4) STATO DELLA CONVERSAZIONE E RISOLUZIONE DEI CHIARIMENTI
+   ========================================================================= */
+var pendingClarification = null; // {a: entry, b: entry}
+
+function resolvePending(raw){
+  var t = normalize(raw);
+  var pair = pendingClarification;
+  pendingClarification = null;
+
+  if(/^(il primo|la prima|primo|prima|1|uno|opzione 1|opzione a|a)\b/.test(t)) return pair.a;
+  if(/^(il secondo|la seconda|secondo|seconda|2|due|opzione 2|opzione b|b)\b/.test(t)) return pair.b;
+
+  var queryTokens = tokenize(raw);
+  var queryNorm = normalize(raw);
+  var scoreA = scoreEntry(queryTokens, queryNorm, pair.a);
+  var scoreB = scoreEntry(queryTokens, queryNorm, pair.b);
+  var lowerBar = MIN_SCORE*0.55;
+  if(scoreA>=lowerBar && scoreA>scoreB) return pair.a;
+  if(scoreB>=lowerBar && scoreB>scoreA) return pair.b;
+  return null; // non risolto: si prosegue con il flusso normale
+}
+
+/* =========================================================================
+   5) INTERFACCIA — rendering dei messaggi
+   ========================================================================= */
+var chatBody = document.getElementById("chatBody");
+var chatForm = document.getElementById("chatForm");
+var chatInput = document.getElementById("chatInput");
+var sendBtn = document.getElementById("sendBtn");
+var launcher = document.getElementById("launcher");
+var chatPanel = document.getElementById("chatPanel");
+var closeBtn = document.getElementById("closeBtn");
+var chips = document.getElementById("chips");
+
+function nowLabel(){
+  var d = new Date();
+  var hh = String(d.getHours()).padStart(2,"0");
+  var mm = String(d.getMinutes()).padStart(2,"0");
+  return hh+":"+mm;
+}
+
+function botAvatarSVG(){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
+}
+function userAvatarSVG(){
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>';
+}
+
+function addMessage(role, text, opts){
+  opts = opts || {};
+  var row = document.createElement("div");
+  row.className = "msg-row " + role;
+
+  var avatar = document.createElement("div");
+  avatar.className = "msg-avatar";
+  avatar.innerHTML = role==="bot" ? botAvatarSVG() : userAvatarSVG();
+
+  var col = document.createElement("div");
+  var bubble = document.createElement("div");
+  bubble.className = "bubble" + (opts.fallback ? " fallback" : "");
+  bubble.textContent = text; // testContent: nessun HTML/script dall'input utente o dai dati viene interpretato
+
+  var time = document.createElement("div");
+  time.className = "msg-time";
+  time.textContent = nowLabel();
+
+  col.appendChild(bubble);
+  col.appendChild(time);
+  row.appendChild(avatar);
+  row.appendChild(col);
+  chatBody.appendChild(row);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+
+function showTyping(){
+  var row = document.createElement("div");
+  row.className = "msg-row bot typing-row";
+  row.id = "typingRow";
+  var avatar = document.createElement("div");
+  avatar.className = "msg-avatar";
+  avatar.innerHTML = botAvatarSVG();
+  var bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  chatBody.appendChild(row);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+function hideTyping(){
+  var row = document.getElementById("typingRow");
+  if(row) row.remove();
+}
+
+function botSay(text, opts, delay){
+  return new Promise(function(resolve){
+    showTyping();
+    setTimeout(function(){
+      hideTyping();
+      addMessage("bot", text, opts);
+      resolve();
+    }, delay || (450 + Math.random()*450));
+  });
+}
+
+/* =========================================================================
+   6) LOGICA DI RISPOSTA
+   ========================================================================= */
+function clarificationText(a,b){
+  return 'Per poterti rispondere correttamente, puoi specificare se ti riferisci a "'+a.q+'" oppure a "'+b.q+'"?';
+}
+
+async function handleUserMessage(raw){
+  var text = raw.trim();
+  if(!text) return;
+
+  addMessage("user", text);
+
+  // 1) risoluzione di un chiarimento in sospeso
+  if(pendingClarification){
+    var resolved = resolvePending(text);
+    if(resolved){
+      await botSay(resolved.a);
+      return;
+    }
+    // non risolto: si prosegue con il flusso normale sottostante
+  }
+
+  // 2) small talk (solo per messaggi molto brevi, non è informazione aziendale)
+  var st = smallTalk(text);
+  if(st){
+    await botSay(st);
+    return;
+  }
+
+  // 3) suddivisione in eventuali sotto-domande e risposta a ciascuna
+  var parts = splitQuestions(text);
+  var renderedIds = {};
+  var anyMatched = false;
+  var anyFallback = false;
+
+  for(var i=0;i<parts.length;i++){
+    var result = classify(parts[i]);
+    if(result.type==="answer"){
+      if(!renderedIds[result.entry.id]){
+        renderedIds[result.entry.id] = true;
+        await botSay(result.entry.a);
+        anyMatched = true;
+      }
+    } else if(result.type==="ambiguous"){
+      pendingClarification = {a:result.a, b:result.b};
+      await botSay(clarificationText(result.a, result.b));
+      anyMatched = true;
+    } else {
+      anyFallback = true;
+    }
+  }
+
+  if(!anyMatched && anyFallback){
+    await botSay(FALLBACK, {fallback:true});
+  }
+}
+
+/* =========================================================================
+   7) EVENTI UI
+   ========================================================================= */
+chatForm.addEventListener("submit", function(ev){
+  ev.preventDefault();
+  var val = chatInput.value;
+  if(!val.trim()) return;
+  chatInput.value = "";
+  chatInput.style.height = "auto";
+  handleUserMessage(val);
+});
+
+chatInput.addEventListener("keydown", function(ev){
+  if(ev.key==="Enter" && !ev.shiftKey){
+    ev.preventDefault();
+    chatForm.requestSubmit();
+  }
+});
+chatInput.addEventListener("input", function(){
+  chatInput.style.height = "auto";
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 96) + "px";
+});
+
+chips.addEventListener("click", function(ev){
+  var btn = ev.target.closest(".chip");
+  if(!btn) return;
+  handleUserMessage(btn.textContent);
+});
+
+function openChat(){
+  chatPanel.classList.remove("closed");
+  launcher.classList.add("hidden");
+  setTimeout(function(){ chatInput.focus(); }, 200);
+}
+function closeChat(){
+  chatPanel.classList.add("closed");
+  launcher.classList.remove("hidden");
+}
+launcher.addEventListener("click", openChat);
+closeBtn.addEventListener("click", closeChat);
+
+/* messaggio di benvenuto iniziale */
+window.addEventListener("DOMContentLoaded", function(){
+  setTimeout(function(){
+    addMessage("bot", "Ciao! Sono l'assistente virtuale di Presidia. Chiedimi pure informazioni sulla direttiva NIS2, sui nostri servizi, sui prezzi o su come contattarci.");
+  }, 350);
+  openChat();
+});
+
+})();
+</script>
+</body>
+</html>
